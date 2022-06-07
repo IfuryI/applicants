@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	EntityType = "Campaign"
+	EntityType = "EducationProgram"
 )
 
 type RepositoryJob interface {

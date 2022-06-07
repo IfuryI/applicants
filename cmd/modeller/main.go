@@ -9,7 +9,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"os"
@@ -42,20 +41,13 @@ func init() {
 // NewApp инициализация приложения
 func NewApp() *App {
 	accessLogger := logger.NewAccessLogger()
+	broker := modeling.NewServer()
 
-	modellerService := modeling.NewModeller()
+	modellerService := modeling.NewModeller(broker)
 
 	return &App{
 		serviceModeller: modellerService,
 		logger:          accessLogger,
-	}
-}
-
-func prometheusHandler() gin.HandlerFunc {
-	h := promhttp.Handler()
-
-	return func(c *gin.Context) {
-		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
@@ -71,7 +63,6 @@ func (app *App) Run(port string) error {
 	router.Static("/avatars", constants.AvatarsFileDir)
 
 	router.Use(gin.Recovery())
-	router.GET("/metrics", prometheusHandler())
 
 	api := router.Group("/api")
 

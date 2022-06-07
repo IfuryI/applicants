@@ -136,7 +136,7 @@ func (h *Handler) Login(ctx *gin.Context) {
 
 	err := ctx.BindJSON(loginData)
 	if err != nil {
-		msg := "Failed to bind subdivision_org data " + err.Error()
+		msg := "Failed to bind users data " + err.Error()
 		h.Log.LogWarning(ctx, "users", "Login", msg)
 		ctx.AbortWithStatus(http.StatusBadRequest) // 400
 		return
@@ -211,7 +211,7 @@ func (h *Handler) UpdateUser(ctx *gin.Context) {
 	changed := new(models.User)
 	err := ctx.BindJSON(changed)
 	if err != nil {
-		msg := "Failed to bind subdivision_org data " + err.Error()
+		msg := "Failed to bind users data " + err.Error()
 		h.Log.LogWarning(ctx, "users", "UpdateUser", msg)
 		ctx.AbortWithStatus(http.StatusBadRequest) // 400
 		return
