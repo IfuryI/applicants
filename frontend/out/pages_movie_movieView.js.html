@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: pages/movie/movieView.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: pages/movie/movieView.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {globalEventBus} from 'utils/eventbus';
+import BaseView from '../baseView';
+import {getFormValues} from 'utils/formDataWork';
+import Validator from 'utils/validation';
+import {setValidationHint} from 'utils/setValidationResult';
+import {UPLOAD_ERROR} from 'utils/errorMessages';
+import {scrollToTargetAdjusted} from 'utils/scrollToTarget';
+import {busEvents} from 'utils/busEvents';
+import {Navbar} from 'components/navbar';
+import {userMeta} from 'utils/userMeta';
+import './movie.tmpl';
+import {AddToPlaylistWidget} from 'components/addToPlaylist';
+import {Carousel} from 'components/carousel';
+
+const REVIEW_HEADING_MAX_LENGTH = 200;
+const REVIEW_TEXT_MAX_LENGTH = 5000;
+
+/**
+ * Представление страницы фильма
+ */
+export default class MovieView extends BaseView {
+    /**
+     * Конструктор
+     * @param {Element} parent - элемент для рендера
+     */
+    constructor(parent) {
+        // eslint-disable-next-line no-undef
+        super(parent, Handlebars.templates['movie.hbs']);
+
+        globalEventBus.on(busEvents.SET_MOVIE_DATA, this.setMovieData.bind(this));
+        globalEventBus.on(busEvents.REVIEW_UPLOADED, this.displayNewReview.bind(this));
+        globalEventBus.on(busEvents.REVIEW_DELETED, this.processReviewDeletion.bind(this));
+        globalEventBus.on(busEvents.SET_REVIEWS_PAGE, this.setReviewsPage.bind(this));
+        globalEventBus.on(busEvents.RATING_UPLOADED, this.displayNewRating.bind(this));
+        globalEventBus.on(busEvents.RATING_DELETED, this.removeRating.bind(this));
+        globalEventBus.on(busEvents.SET_PLAYLIST_DATA_MOVIE, this.displayPlaylists.bind(this));
+
+        this.reviewHeadingInputCallback = this.reviewHeadingInput.bind(this);
+        this.reviewTextInputCallback = this.reviewTextInput.bind(this);
+        this.reviewFormSubmittedCallback = this.reviewFormSubmitted.bind(this);
+        this.editReviewClickedCallback = this.editReviewClicked.bind(this);
+        this.deleteReviewClickedCallback = this.deleteReviewClicked.bind(this);
+        this.ratingSubmittedCallback = this.ratingSubmitted.bind(this);
+        this.deleteRatingClickedCallback = this.deleteRatingClicked.bind(this);
+        this.paginationButtonClickedCallback = this.paginationButtonClicked.bind(this);
+        this.watchedClickedCallback = this.watchedClicked.bind(this);
+        this.playlistClickedCallback = this.playlistClicked.bind(this);
+    }
+
+    /**
+     * Запуск рендера
+     * @param {number} id - id фильма
+     */
+    render(id) {
+        globalEventBus.emit(busEvents.GET_MOVIE_DATA, id);
+    }
+
+    /**
+     * Установка данных о фильме
+     * @param {Object} data - данные фильма
+     */
+    setMovieData(data) {
+        this.data = data;
+        super.render(this.data);
+
+        this.setUserRating();
+
+        this.navbarComponent = new Navbar(document.getElementById('navbar'),
+            {'authorized': userMeta.getAuthorized()});
+        this.navbarComponent.render();
+
+        this.similarMoviesCarousel = new Carousel(document.getElementById('similar-movies-carousel'),
+            {'itemsType': 'movies', 'items': {...this.data.similarMovies}});
+        this.similarMoviesCarousel.render();
+
+        this.setEventListeners();
+    }
+
+    /**
+     * "Деструктор" страницы
+     */
+    hide() {
+        this.currentPlaylistWidget = null;
+        super.hide(this);
+    }
+
+    /**
+     * Установка колбеков
+     */
+    setEventListeners() {
+        document.getElementById('watched-button')?.addEventListener('click', this.watchedClickedCallback);
+        document.getElementById('playlist-button')?.addEventListener('click', this.playlistClickedCallback);
+
+        document.getElementById('review-heading-input')?.addEventListener('input', this.reviewHeadingInputCallback);
+        document.getElementById('review-text-input')?.addEventListener('input', this.reviewTextInputCallback);
+        document.getElementById('review')?.addEventListener('submit', this.reviewFormSubmittedCallback);
+        document.getElementById('edit-button')?.addEventListener('click', this.editReviewClickedCallback);
+        document.getElementById('delete-button')?.addEventListener('click', this.deleteReviewClickedCallback);
+
+        document.getElementById('delete-rating')?.addEventListener('click', this.deleteRatingClickedCallback);
+
+        [...document.getElementsByClassName('rating-stars__label-star')].forEach((star) => {
+            star.addEventListener('click', this.ratingSubmittedCallback);
+        });
+
+        [...document.getElementsByClassName('pagination-wrapper__button')].forEach((button) => {
+            button.addEventListener('click', this.paginationButtonClickedCallback);
+        });
+
+        this.navbarComponent.setEventListeners();
+        this.similarMoviesCarousel.setEventListeners();
+    }
+
+    /**
+     * Удаление колбеков
+     */
+    removeEventListeners() {
+        document.getElementById('watched-button')?.removeEventListener('click', this.watchedClickedCallback);
+        document.getElementById('playlist-button')?.removeEventListener('click', this.playlistClickedCallback);
+
+        document.getElementById('review-heading-input')?.removeEventListener('input', this.reviewHeadingInputCallback);
+        document.getElementById('review-text-input')?.removeEventListener('input', this.reviewTextInputCallback);
+        document.getElementById('review')?.removeEventListener('submit', this.reviewFormSubmittedCallback);
+        document.getElementById('edit-button')?.removeEventListener('click', this.editReviewClickedCallback);
+        document.getElementById('delete-button')?.removeEventListener('click', this.deleteReviewClickedCallback);
+
+        [...document.getElementsByClassName('rating-stars__label-star')].forEach((star) => {
+            star.removeEventListener('click', this.ratingSubmittedCallback);
+        });
+
+        [...document.getElementsByClassName('pagination-wrapper__button')].forEach((button) => {
+            button.removeEventListener('click', this.paginationButtonClickedCallback);
+        });
+
+        this.navbarComponent.removeEventListeners();
+        this.similarMoviesCarousel.removeEventListeners();
+        this.currentPlaylistWidget?.hide();
+    }
+
+    /**
+     * Установка блока с рецензиями пользователей
+     * @param {boolean} status - успешность запроса
+     * @param {Object} reviewsData - информация о рецензиях
+     */
+    setReviewsPage(status, reviewsData) {
+        if (status) {
+            this.data.reviewsData = reviewsData;
+            super.render(this.data);
+
+            this.navbarComponent = new Navbar(document.getElementById('navbar'),
+                {'authorized': userMeta.getAuthorized()});
+            this.navbarComponent.render();
+
+            this.setEventListeners();
+            scrollToTargetAdjusted(document.getElementById('first-review'));
+        }
+    }
+
+    /**
+     * Отображение оценки пользователя к фильму
+     */
+    setUserRating() {
+        if (this.data.userRating !== null) {
+            const starID = `star-${this.data.userRating.score}`;
+            document.getElementById(starID).checked = true;
+        }
+    }
+
+    /**
+     * Отображение новой оценки к фильму
+     * @param {boolean} status - статус создания оценки
+     * @param {number} score - оценка пользователя
+     */
+    displayNewRating(status, score) {
+        if (status) {
+            this.data.userRating = {
+                'movie_id': this.data.id,
+                'score': score,
+            };
+            this.setMovieData(this.data);
+        }
+    }
+
+    /**
+     * Реакция на удаление оценки
+     * @param {boolean} status - статус редактирования оценки
+     */
+    removeRating(status) {
+        if (status) {
+            this.data.userRating = null;
+            this.setMovieData(this.data);
+        }
+    }
+
+    /**
+     * Отображение новой рецензии пользователя
+     * @param {boolean} status - статус создания рецензии
+     * @param {Object} review - объект рецензии
+     */
+    displayNewReview(status, review) {
+        if (status) {
+            this.data.userReview = review;
+            this.data.wantsToEditReview = false;
+            this.setMovieData(this.data);
+            return;
+        }
+        document.getElementById('validation-hint-review').innerText = UPLOAD_ERROR;
+    }
+
+    /**
+     * Реакция на удаление рецензии
+     * @param {boolean} status - статус удаление рецензии
+     * @param {number} movieID - id фильма
+     */
+    processReviewDeletion(status, movieID) {
+        if (status) {
+            this.data.userReview = null;
+            this.setMovieData(this.data);
+        }
+    }
+
+    /**
+     * Обработка ввода текста в заголовок рецензии
+     * @param {Object} event - объект события
+     */
+    reviewHeadingInput(event) {
+        if (event.target.value.length > REVIEW_HEADING_MAX_LENGTH) {
+            document.getElementById('validation-hint-review').innerText = 'Введите заголовок до 200 символов!';
+            document.getElementById('review-button').disabled = true;
+            return;
+        }
+        document.getElementById('review-button').disabled = false;
+        document.getElementById('validation-hint-review').innerText = '';
+    }
+
+    /**
+     * Обработка ввода текста рецензии
+     * @param {Object} event - объект события
+     */
+    reviewTextInput(event) {
+        if (event.target.value.length > REVIEW_TEXT_MAX_LENGTH) {
+            document.getElementById('validation-hint-review').innerText = 'Введите текст рецензии до 5000 символов!';
+            document.getElementById('review-button').disabled = true;
+            return;
+        }
+        document.getElementById('review-button').disabled = false;
+        document.getElementById('validation-hint-review').innerText = '';
+    }
+
+    /**
+     * Обработка отправки формы с рецензией
+     * @param {Object} event - событие submitted
+     */
+    reviewFormSubmitted(event) {
+        event.preventDefault();
+
+        const data = getFormValues(event.target);
+        data.movie_id = this.data.id;
+
+        const validator = new Validator();
+        const reviewErrors = validator.validateReview(data);
+        const validationHint = document.getElementById('validation-hint-review');
+        if (reviewErrors.length === 0) {
+            globalEventBus.emit((this.data.wantsToEditReview) ? busEvents.EDIT_REVIEW : busEvents.SEND_REVIEW, data);
+            return;
+        }
+        setValidationHint(validationHint, reviewErrors);
+    }
+
+    /**
+     * Нажатие на кнопку редактирования рецензии
+     */
+    editReviewClicked() {
+        this.setMovieData({...this.data, 'wantsToEditReview': true});
+    }
+
+    /**
+     * Нажатие на кнопку удаления рецензии
+     */
+    deleteReviewClicked() {
+        globalEventBus.emit(busEvents.DELETE_REVIEW, this.data.id);
+    }
+
+    /**
+     * Нажатие на кнопку добавления оценки
+     * @param {Object} event - событие нажатия на "звезду"
+     */
+    ratingSubmitted(event) {
+        const action = (this.data.userRating === null) ? busEvents.SEND_RATING : busEvents.EDIT_RATING;
+        globalEventBus.emit(action, this.data.id, event.target.getAttribute('data-rating'));
+    }
+
+    /**
+     * Нажатие на кнопку удаления оценки
+     */
+    deleteRatingClicked() {
+        globalEventBus.emit(busEvents.DELETE_RATING, this.data.id);
+    }
+
+    /**
+     * Нажатие на кнопку пагинации в списке рецензий
+     * @param {Object} event - событие нажатия на кнопку пагинации
+     */
+    paginationButtonClicked(event) {
+        globalEventBus.emit(busEvents.GET_REVIEWS_PAGE, this.data.id, event.target.getAttribute('data-page-index'));
+    }
+
+    /**
+     * Обработчик нажатия на кнопку "Просмотрено"
+     * @param {Object} event - событие нажатия
+     */
+    watchedClicked(event) {
+        const checkbox = event.target;
+        const movieId = checkbox.getAttribute('data-id');
+        if (checkbox.checked) {
+            globalEventBus.emit(busEvents.WATCH_MOVIE_MOVIE_PAGE, movieId);
+            return;
+        }
+        globalEventBus.emit(busEvents.UNWATCH_MOVIE_MOVIE_PAGE, movieId);
+    }
+
+    /**
+     * Обработчик нажатия на кнопку "Добавить в плейлист"
+     * @param {Object} event - событие нажатия
+     */
+    playlistClicked(event) {
+        this.currentPlaylistWidget?.hide();
+        this.currentPlaylistWidget = null;
+        if (event.target.checked) {
+            globalEventBus.emit(busEvents.GET_PLAYLIST_DATA_MOVIE, this.data.id);
+        }
+    }
+
+    /**
+     * Отобразить виджет со списком плейлистов
+     * @param {Object} playlists - информация о плейлистах
+     */
+    displayPlaylists(playlists) {
+        const playlistsData = {
+            'playlists': playlists,
+            'movieId': this.data.id,
+        };
+        this.currentPlaylistWidget = new AddToPlaylistWidget(document.getElementById(`add-to-playlist-${this.data.id}`),
+            playlistsData);
+        this.currentPlaylistWidget.render();
+        this.currentPlaylistWidget.setEventListeners();
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AddToPlaylistWidget.html">AddToPlaylistWidget</a></li><li><a href="Api.html">Api</a></li><li><a href="Carousel.html">Carousel</a></li><li><a href="Component.html">Component</a></li><li><a href="EventBus.html">EventBus</a></li><li><a href="module.exports.html">exports</a></li><li><a href="Navbar.html">Navbar</a></li><li><a href="PlaylistTabs.html">PlaylistTabs</a></li><li><a href="Router.html">Router</a></li><li><a href="UserMeta.html">UserMeta</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addRating">addRating</a></li><li><a href="global.html#addReview">addReview</a></li><li><a href="global.html#changeSettings">changeSettings</a></li><li><a href="global.html#checkLogin">checkLogin</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#deleteRating">deleteRating</a></li><li><a href="global.html#deleteRatingClicked">deleteRatingClicked</a></li><li><a href="global.html#deleteReview">deleteReview</a></li><li><a href="global.html#deleteReviewClicked">deleteReviewClicked</a></li><li><a href="global.html#deltaSettings">deltaSettings</a></li><li><a href="global.html#displayNewRating">displayNewRating</a></li><li><a href="global.html#displayNewReview">displayNewReview</a></li><li><a href="global.html#displayPlaylists">displayPlaylists</a></li><li><a href="global.html#displayServerResponse">displayServerResponse</a></li><li><a href="global.html#displayServerResponseAvatar">displayServerResponseAvatar</a></li><li><a href="global.html#editRating">editRating</a></li><li><a href="global.html#editReview">editReview</a></li><li><a href="global.html#editReviewClicked">editReviewClicked</a></li><li><a href="global.html#followClicked">followClicked</a></li><li><a href="global.html#formSubmitted">formSubmitted</a></li><li><a href="global.html#getActorData">getActorData</a></li><li><a href="global.html#getBestMovies">getBestMovies</a></li><li><a href="global.html#getFeed">getFeed</a></li><li><a href="global.html#getGenreMovies">getGenreMovies</a></li><li><a href="global.html#getMainPageData">getMainPageData</a></li><li><a href="global.html#getMovieData">getMovieData</a></li><li><a href="global.html#getMoviesByGenresPreview">getMoviesByGenresPreview</a></li><li><a href="global.html#getPlaylistsForMovie">getPlaylistsForMovie</a></li><li><a href="global.html#getProfileData">getProfileData</a></li><li><a href="global.html#getReviewsPage">getReviewsPage</a></li><li><a href="global.html#getSearchResults">getSearchResults</a></li><li><a href="global.html#getSelectedGenres">getSelectedGenres</a></li><li><a href="global.html#getSettingsData">getSettingsData</a></li><li><a href="global.html#getSimilarMovies">getSimilarMovies</a></li><li><a href="global.html#hide">hide</a></li><li><a href="global.html#inputSettings">inputSettings</a></li><li><a href="global.html#likeActor">likeActor</a></li><li><a href="global.html#paginationButtonClicked">paginationButtonClicked</a></li><li><a href="global.html#playlistClicked">playlistClicked</a></li><li><a href="global.html#popUpHide">popUpHide</a></li><li><a href="global.html#proceedFollow">proceedFollow</a></li><li><a href="global.html#processLikeActor">processLikeActor</a></li><li><a href="global.html#processLoginAttempt">processLoginAttempt</a></li><li><a href="global.html#processReviewDeletion">processReviewDeletion</a></li><li><a href="global.html#processSignupAttempt">processSignupAttempt</a></li><li><a href="global.html#ratingSubmitted">ratingSubmitted</a></li><li><a href="global.html#removeEventListeners">removeEventListeners</a></li><li><a href="global.html#removeRating">removeRating</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#reviewFormSubmitted">reviewFormSubmitted</a></li><li><a href="global.html#reviewHeadingInput">reviewHeadingInput</a></li><li><a href="global.html#reviewTextInput">reviewTextInput</a></li><li><a href="global.html#saveClicked">saveClicked</a></li><li><a href="global.html#searchMoviesByGenres">searchMoviesByGenres</a></li><li><a href="global.html#searchMoviesByGenresPreview">searchMoviesByGenresPreview</a></li><li><a href="global.html#selectChosenGenres">selectChosenGenres</a></li><li><a href="global.html#selectGenresListener">selectGenresListener</a></li><li><a href="global.html#sendAvatar">sendAvatar</a></li><li><a href="global.html#sendInput">sendInput</a></li><li><a href="global.html#setActorDataCallback">setActorDataCallback</a></li><li><a href="global.html#setEventListeners">setEventListeners</a></li><li><a href="global.html#setFeedData">setFeedData</a></li><li><a href="global.html#setLoginPage">setLoginPage</a></li><li><a href="global.html#setMainPageData">setMainPageData</a></li><li><a href="global.html#setMovieData">setMovieData</a></li><li><a href="global.html#setMovies">setMovies</a></li><li><a href="global.html#setMoviesByGenresPreview">setMoviesByGenresPreview</a></li><li><a href="global.html#setPhotoPreviewListener">setPhotoPreviewListener</a></li><li><a href="global.html#setProfileData">setProfileData</a></li><li><a href="global.html#setReviewsPage">setReviewsPage</a></li><li><a href="global.html#setSearchResults">setSearchResults</a></li><li><a href="global.html#setSettings">setSettings</a></li><li><a href="global.html#setSignupPage">setSignupPage</a></li><li><a href="global.html#setUserRating">setUserRating</a></li><li><a href="global.html#toggleFollowUser">toggleFollowUser</a></li><li><a href="global.html#unlikeActor">unlikeActor</a></li><li><a href="global.html#unwatchMovie">unwatchMovie</a></li><li><a href="global.html#uploadAvatarClicked">uploadAvatarClicked</a></li><li><a href="global.html#validateAvatar">validateAvatar</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validatePassword">validatePassword</a></li><li><a href="global.html#validateReview">validateReview</a></li><li><a href="global.html#validateSettings">validateSettings</a></li><li><a href="global.html#watchedClicked">watchedClicked</a></li><li><a href="global.html#watchMovie">watchMovie</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Apr 25 2022 03:56:33 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

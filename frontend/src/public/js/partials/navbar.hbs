@@ -1,0 +1,35 @@
+<div id="header" class="header">
+    <div class="header__section">
+        <div class="header__item header__logo">
+            <a href="">Сервис приёма</a>
+        </div>
+        <div class="header__item header__button">
+            <a href="/">Моделирование</a>
+        </div>
+        <div class="header__item header__button" id="reqbtn">
+            <a href="/request">Создание заявки в очередь</a>
+        </div>
+    </div>
+
+    <div class="header__section">
+        {{#if authorized}}
+            <div class="header__item header__button">
+                <a href="/user/{{getUsername}}">Профиль</a>
+            </div>
+            <div class="header__item header__button">
+                <a id="logout-button">Выйти</a>
+            </div>
+        {{else}}
+            <div class="header__item header__button">
+                <a href="/login">Войти</a>
+            </div>
+            <div class="header__item header__button">
+                <a href="/signup">Регистрация</a>
+            </div>
+        {{/if}}
+    </div>
+
+    <a href="javascript:void(0);" id="bars-icon" class="header__bars-icon">
+        <i class="fa fa-bars fa-button"></i>
+    </a>
+</div>

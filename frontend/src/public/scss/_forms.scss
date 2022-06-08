@@ -1,0 +1,148 @@
+.form-box {
+  width: 380px;
+  position: relative;
+  margin: 80px auto;
+  background-color: $white-color;
+  padding: 4px 4px 32px 4px;
+  border-radius: $l-border-radius;
+
+  &__button-box {
+    width: 120px;
+    margin: 36px auto;
+    position: relative;
+    border-radius: $xl-border-radius;
+    display: flex;
+  }
+
+  &__social-icons {
+    margin: 32px auto;
+    text-align: center;
+  }
+
+  &__social-icons img {
+    width: 30px;
+    margin: 0 12px;
+    box-shadow: 0 0 20px 0 $social-shadow-color;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  &__form {
+    margin: 0 auto;
+  }
+
+  &__input-group {
+    width: 280px;
+    transition: .5s;
+  }
+}
+
+.button-box {
+
+  &__toggle-button {
+    width: 120px;
+    padding: 12px 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    outline: none;
+    position: relative;
+  }
+
+  &__button-wrap {
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 120px;
+    height: 100%;
+    background: linear-gradient(to right, $button-gradient-first, $button-gradient-second);
+    border-radius: $xl-border-radius;
+    transition: .5s;
+  }
+}
+
+.form {
+
+  &__input-field {
+    width: 100%;
+    padding: 12px 2px 12px 14px;
+    margin: 4px 0;
+    border: 0;
+    border-bottom: 1px solid $grayish;
+    outline: none;
+    background: transparent;
+  }
+
+  &__validation-hint {
+    font-size: 12px;
+    color: $invalid-color;
+  }
+
+  &__send-form-hint {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  &__submit-button {
+    padding: 12px 32px;
+    cursor: pointer;
+    display: block;
+    margin: auto;
+    background: linear-gradient(to right, $button-gradient-first, $button-gradient-second);
+    border: 0;
+    outline: none;
+    border-radius: $xl-border-radius;
+    color: $white-color;
+  }
+
+  &__checkbox {
+    margin: 24px 4px 32px 0;
+  }
+
+  &__checkbox-label {
+    color: $secondary-text-color;
+    font-size: 12px;
+  }
+}
+
+.valid-input {
+  border: 1px solid $valid-color;
+  border-radius: $xs-border-radius;
+}
+
+.invalid-input {
+  border: 1px solid $invalid-color;
+  border-radius: $xs-border-radius;
+}
+
+/* classes for JS to move signup and login forms */
+
+.login-form-inactive {
+  left: -400px;
+}
+
+.signup-form-active {
+  left: 50px;
+}
+
+.switcher-on-signup {
+  left: 120px;
+}
+
+.button-box__button_text_white {
+  color: $white-color;
+}
+
+@media (max-width: 600px) {
+  .form-box {
+    width: 70%;
+  }
+
+  .form-box__input-group {
+    width: 90%;
+  }
+
+  .form__input-field {
+    padding: 12px 0;
+  }
+}

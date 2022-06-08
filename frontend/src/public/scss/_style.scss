@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600");
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa");
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: $header-background;
+  font-family: "Comfortaa", serif;
+  //overflow: hidden;
+
+  &__section {
+    display: flex;
+    align-items: center;
+
+    &_search {
+      width: 100%;
+    }
+  }
+
+  &__item {
+    font-size: 20px;
+    margin-left: 4px;
+  }
+
+  &__item a {
+    display: block;
+    padding: 12px 16px;
+    color: $secondary-text-color;
+    text-decoration: none;
+  }
+
+  &__item:hover {
+    background-color: $accent-color;
+    border-radius: $xs-border-radius;
+
+    a {
+      color: $white-color;
+    }
+  }
+
+  &__logo {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  &__button {
+    cursor: pointer;
+  }
+
+  &__search {
+    width: 70%;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    margin: auto;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid $secondary-text-color;
+    border-radius: 40px;
+  }
+
+  &__search-input {
+    width: 100%;
+    font-size: 18px;
+    background: none;
+    color: $primary-text-color;
+    border: none;
+    appearance: none;
+    outline: none;
+    margin-left: 12px;
+
+    &::-webkit-search-cancel-button {
+      appearance: none;
+    }
+  }
+
+  &__search-button {
+    border: none;
+    background: none;
+    outline: none;
+    cursor: pointer;
+    margin-right: 8px;
+
+    i {
+      color: $secondary-text-color;
+      font-size: 1.5em;
+    }
+  }
+
+  &__bars-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .header .header__section:not(:first-child) {
+    display: none;
+  }
+
+  .header__bars-icon {
+    display: block;
+    position: absolute;
+    font-size: 24px;
+    color: $primary-text-color;
+    right: 0;
+    top: 0;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header.responsive {
+    display: block;
+    position: relative;
+  }
+
+  .header.responsive .header__section {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+}
+
+.main {
+  position: absolute;
+  width: 100%;
+  min-height: 100%;
+  background-color: $main-background;
+  color: $primary-text-color;
+
+  &__page-title {
+    text-align: center;
+    font-size: 32px;
+    color: $primary-text-color;
+    margin: 32px 0 60px 0;
+  }
+
+  &__pagination-wrapper {
+    padding: 10px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+
+    a:first-child {
+
+      button {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+
+    a:last-child {
+
+      button {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+    }
+  }
+
+  &__main-empty {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+.pagination-wrapper {
+
+  &__button {
+    font-size: 18px;
+    padding: 12px 16px;
+    border: 1px solid $whitish;
+
+    &:hover:not([disabled]) {
+      background-color: $whitish;
+    }
+
+    &:disabled {
+      background-color: $accent-color;
+      color: white;
+    }
+  }
+}

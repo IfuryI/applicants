@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/addToPlaylist.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/addToPlaylist.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {Component} from './component';
+import '../partials/addToPlaylistWidget.tmpl';
+import '../partials/playlistRow.tmpl';
+import {API} from 'utils/api';
+import {CREATED, ENTER_KEYCODE} from 'utils/codes';
+
+/**
+ * Компонент "Добавить в плейлист"
+ */
+export class AddToPlaylistWidget extends Component {
+    /**
+     * Конструктор компонента
+     * @param {Object} parent - родитель компонента
+     * @param {Object} state - перечиление полей-состояний компонента
+     */
+    constructor(parent, state) {
+        super(parent, state);
+        // eslint-disable-next-line no-undef
+        this.renderHBS = Handlebars.templates['addToPlaylistWidget.hbs'];
+        // eslint-disable-next-line no-undef
+        this.renderPlaylistRowHBS = Handlebars.templates['playlistRow.hbs'];
+        this.createPlaylistClickedCallback = this.createPlaylistClicked.bind(this);
+        this.createPlaylistCallback = this.createPlaylist.bind(this);
+        this.enterPressedCallback = this.enterPressed.bind(this);
+        this.removeCreationCallback = this.removeCreationForm.bind(this);
+        this.checkboxClickedCallback = this.checkboxClicked.bind(this);
+    }
+
+    /**
+     * HTML-код компонента
+     * @return {string} - html-код
+     */
+    tmpl() {
+        return this.renderHBS(this.state);
+    }
+
+    /**
+     * Установить листенеры компоненту
+     */
+    setEventListeners() {
+        document.getElementById('create-playlist-button')
+            .addEventListener('click', this.createPlaylistClickedCallback);
+        [...document.getElementsByClassName('add-to-playlist-widget__checkbox')]
+            .forEach((el) => el.addEventListener('click', this.checkboxClickedCallback));
+    }
+
+    /**
+     * Убрать листенеры компонента
+     */
+    removeEventListeners() {
+        document.getElementById('create-playlist-button')
+            .removeEventListener('click', this.createPlaylistClickedCallback);
+        [...document.getElementsByClassName('add-to-playlist-widget__checkbox')]
+            .forEach((el) => el.removeEventListener('click', this.checkboxClickedCallback));
+        // если была нажата кнопка "Создать плейлист"
+        if (document.getElementById('submit-create-playlist')) {
+            this.removeCreationForm();
+        }
+    }
+
+    /**
+     * Обработка нажатия на кнопку "Создать плейлист"
+     */
+    createPlaylistClicked() {
+        document.getElementById('create-playlist-container')
+            .classList.remove('create-playlist-container_hidden');
+        document.getElementById('submit-create-playlist')
+            .addEventListener('click', this.createPlaylistCallback);
+        document.getElementById('input-create-playlist')
+            .addEventListener('keyup', this.enterPressedCallback);
+        document.getElementById('cancel-create-playlist')
+            .addEventListener('click', this.removeCreationCallback);
+    }
+
+    /**
+     * Убрать форму создания плейлиста
+     */
+    removeCreationForm() {
+        document.getElementById('create-playlist-container')
+            .classList.add('create-playlist-container_hidden');
+        document.getElementById('submit-create-playlist')
+            .removeEventListener('click', this.createPlaylistCallback);
+        document.getElementById('input-create-playlist')
+            .removeEventListener('keyup', this.enterPressedCallback);
+        document.getElementById('cancel-create-playlist')
+            .removeEventListener('click', this.removeCreationCallback);
+    }
+
+    /**
+     * Отобразить созданный плейлист в списке
+     */
+    createPlaylist() {
+        const playlistName = document.getElementById('input-create-playlist').value;
+        API.createPlaylist(playlistName).then((res) => this.processCreate(res.status === CREATED, playlistName));
+    }
+
+    /**
+     * Отображение результата создания плейлиста
+     * @param {boolean} status - успешность запроса
+     * @param {string} playlistName - имя созданного плейлиста
+     */
+    processCreate(status, playlistName) {
+        const playlists = document.getElementById('playlists-list');
+        const newId = playlists.childElementCount + 1;
+        playlists.insertAdjacentHTML('beforeend', this.renderPlaylistRowHBS({
+            id: newId,
+            playlist_name: playlistName,
+            is_added: false,
+            movieId: this.state.movieId,
+        }));
+        const newCheckbox = document.getElementById(`checkbox-${newId}`);
+        newCheckbox.addEventListener('click', this.checkboxClickedCallback);
+        document.getElementById('no-playlists-message')?.remove();
+        document.getElementById('input-create-playlist').value = '';
+        this.removeCreationForm();
+    }
+
+    /**
+     * Обработка нажатия на checkbox плейлиста
+     * @param {Object} event - событие нажатия на checkbox
+     */
+    checkboxClicked(event) {
+        const checkbox = event.target;
+        const label = checkbox.previousElementSibling;
+        const playlistId = label.getAttribute('data-playlist-id');
+        const movieId = checkbox.getAttribute('data-movie-id');
+        if (checkbox.checked) {
+            API.addMovieToPlaylist(playlistId, movieId).then(() => {});
+        } else {
+            API.deleteMovieFromPlaylist(playlistId, movieId).then(() => {});
+        }
+    }
+
+    /**
+     * Обработка нажатия Enter в строке создания плейлиста
+     * @param {Object} event - объект события
+     */
+    enterPressed(event) {
+        if (event.keyCode === ENTER_KEYCODE) {
+            this.createPlaylistCallback();
+        }
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AddToPlaylistWidget.html">AddToPlaylistWidget</a></li><li><a href="Api.html">Api</a></li><li><a href="Carousel.html">Carousel</a></li><li><a href="Component.html">Component</a></li><li><a href="EventBus.html">EventBus</a></li><li><a href="module.exports.html">exports</a></li><li><a href="Navbar.html">Navbar</a></li><li><a href="PlaylistTabs.html">PlaylistTabs</a></li><li><a href="Router.html">Router</a></li><li><a href="UserMeta.html">UserMeta</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addRating">addRating</a></li><li><a href="global.html#addReview">addReview</a></li><li><a href="global.html#changeSettings">changeSettings</a></li><li><a href="global.html#checkLogin">checkLogin</a></li><li><a href="global.html#createUser">createUser</a></li><li><a href="global.html#deleteRating">deleteRating</a></li><li><a href="global.html#deleteRatingClicked">deleteRatingClicked</a></li><li><a href="global.html#deleteReview">deleteReview</a></li><li><a href="global.html#deleteReviewClicked">deleteReviewClicked</a></li><li><a href="global.html#deltaSettings">deltaSettings</a></li><li><a href="global.html#displayNewRating">displayNewRating</a></li><li><a href="global.html#displayNewReview">displayNewReview</a></li><li><a href="global.html#displayPlaylists">displayPlaylists</a></li><li><a href="global.html#displayServerResponse">displayServerResponse</a></li><li><a href="global.html#displayServerResponseAvatar">displayServerResponseAvatar</a></li><li><a href="global.html#editRating">editRating</a></li><li><a href="global.html#editReview">editReview</a></li><li><a href="global.html#editReviewClicked">editReviewClicked</a></li><li><a href="global.html#followClicked">followClicked</a></li><li><a href="global.html#formSubmitted">formSubmitted</a></li><li><a href="global.html#getActorData">getActorData</a></li><li><a href="global.html#getBestMovies">getBestMovies</a></li><li><a href="global.html#getFeed">getFeed</a></li><li><a href="global.html#getGenreMovies">getGenreMovies</a></li><li><a href="global.html#getMainPageData">getMainPageData</a></li><li><a href="global.html#getMovieData">getMovieData</a></li><li><a href="global.html#getMoviesByGenresPreview">getMoviesByGenresPreview</a></li><li><a href="global.html#getPlaylistsForMovie">getPlaylistsForMovie</a></li><li><a href="global.html#getProfileData">getProfileData</a></li><li><a href="global.html#getReviewsPage">getReviewsPage</a></li><li><a href="global.html#getSearchResults">getSearchResults</a></li><li><a href="global.html#getSelectedGenres">getSelectedGenres</a></li><li><a href="global.html#getSettingsData">getSettingsData</a></li><li><a href="global.html#getSimilarMovies">getSimilarMovies</a></li><li><a href="global.html#hide">hide</a></li><li><a href="global.html#inputSettings">inputSettings</a></li><li><a href="global.html#likeActor">likeActor</a></li><li><a href="global.html#paginationButtonClicked">paginationButtonClicked</a></li><li><a href="global.html#playlistClicked">playlistClicked</a></li><li><a href="global.html#popUpHide">popUpHide</a></li><li><a href="global.html#proceedFollow">proceedFollow</a></li><li><a href="global.html#processLikeActor">processLikeActor</a></li><li><a href="global.html#processLoginAttempt">processLoginAttempt</a></li><li><a href="global.html#processReviewDeletion">processReviewDeletion</a></li><li><a href="global.html#processSignupAttempt">processSignupAttempt</a></li><li><a href="global.html#ratingSubmitted">ratingSubmitted</a></li><li><a href="global.html#removeEventListeners">removeEventListeners</a></li><li><a href="global.html#removeRating">removeRating</a></li><li><a href="global.html#render">render</a></li><li><a href="global.html#reviewFormSubmitted">reviewFormSubmitted</a></li><li><a href="global.html#reviewHeadingInput">reviewHeadingInput</a></li><li><a href="global.html#reviewTextInput">reviewTextInput</a></li><li><a href="global.html#saveClicked">saveClicked</a></li><li><a href="global.html#searchMoviesByGenres">searchMoviesByGenres</a></li><li><a href="global.html#searchMoviesByGenresPreview">searchMoviesByGenresPreview</a></li><li><a href="global.html#selectChosenGenres">selectChosenGenres</a></li><li><a href="global.html#selectGenresListener">selectGenresListener</a></li><li><a href="global.html#sendAvatar">sendAvatar</a></li><li><a href="global.html#sendInput">sendInput</a></li><li><a href="global.html#setActorDataCallback">setActorDataCallback</a></li><li><a href="global.html#setEventListeners">setEventListeners</a></li><li><a href="global.html#setFeedData">setFeedData</a></li><li><a href="global.html#setLoginPage">setLoginPage</a></li><li><a href="global.html#setMainPageData">setMainPageData</a></li><li><a href="global.html#setMovieData">setMovieData</a></li><li><a href="global.html#setMovies">setMovies</a></li><li><a href="global.html#setMoviesByGenresPreview">setMoviesByGenresPreview</a></li><li><a href="global.html#setPhotoPreviewListener">setPhotoPreviewListener</a></li><li><a href="global.html#setProfileData">setProfileData</a></li><li><a href="global.html#setReviewsPage">setReviewsPage</a></li><li><a href="global.html#setSearchResults">setSearchResults</a></li><li><a href="global.html#setSettings">setSettings</a></li><li><a href="global.html#setSignupPage">setSignupPage</a></li><li><a href="global.html#setUserRating">setUserRating</a></li><li><a href="global.html#toggleFollowUser">toggleFollowUser</a></li><li><a href="global.html#unlikeActor">unlikeActor</a></li><li><a href="global.html#unwatchMovie">unwatchMovie</a></li><li><a href="global.html#uploadAvatarClicked">uploadAvatarClicked</a></li><li><a href="global.html#validateAvatar">validateAvatar</a></li><li><a href="global.html#validateEmail">validateEmail</a></li><li><a href="global.html#validateLogin">validateLogin</a></li><li><a href="global.html#validatePassword">validatePassword</a></li><li><a href="global.html#validateReview">validateReview</a></li><li><a href="global.html#validateSettings">validateSettings</a></li><li><a href="global.html#watchedClicked">watchedClicked</a></li><li><a href="global.html#watchMovie">watchMovie</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Mon Apr 25 2022 03:56:33 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
