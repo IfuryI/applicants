@@ -1,0 +1,89 @@
+<div id="navbar"></div>
+
+
+<div class="main">
+    <div class="form-box">
+        <div class="form-box__button-box">
+            <div id="button-box__current-button" class="button-box__button-wrap"></div>
+            <button type="button" class="button-box__toggle-button button-box__button_text_white"
+                    id="login-button">Заявка абитуриента</button>
+        </div>
+
+        <form id="request" class="form-box__form form-box__input-group">
+            <input name="password" type="text" class="form__input-field" placeholder="Фамилия">
+            <input name="password" type="text" class="form__input-field" placeholder="Имя">
+            <input name="password" type="text" class="form__input-field" placeholder="Отчество">
+            <input name="username" type="text" class="form__input-field" placeholder="Снилс">
+            <input name="password" type="text" class="form__input-field" placeholder="Серия паспорта">
+            <input name="password" type="text" class="form__input-field" placeholder="Номер паспорта">
+            <input name="password" type="date" class="form__input-field" placeholder="Дата рождения">
+
+            <p><select class="form__input-field">
+                <option selected disabled>Выберите ВУЗ</option>
+                <option value="mgtu">МГТУ им. Н.Э. Баумана</option>
+                <option value="mgtuM">Мытищинский филиал МГТУ им. Н.Э. Баумана</option>
+                <option value="mgtuK">Калужский филиал МГТУ им. Н.Э. Баумана</option>
+            </select></p>
+
+            <p><select class="form__input-field">
+                <option selected disabled>Выберите факультет</option>
+                <option value="iu">ИУ</option>
+                <option value="rl">РЛ</option>
+                <option value="rk">РК</option>
+            </select></p>
+
+            <p><select class="form__input-field">
+                <option selected disabled>Выберите кафедру</option>
+                <option value="iu7">ИУ7 - Программное обеспечение ЭВМ и информационные технологии</option>
+                <option value="iu6">ИУ6 - Компьютерные системы и сети</option>
+                <option value="iu8">ИУ8 - Информационная безопасность</option>
+            </select></p>
+
+
+            <div class="form__input-field">
+                <label for="hostel">Нужно ли общежитие</label>
+                <input name="hostel" type="checkbox" id="hostel" name="hostel">
+            </div>
+
+            <div class="form__input-field">
+                <label for="isAgree">Согласие на зачисление</label>
+                <input name="isAgree" type="checkbox" id="isAgree" name="isAgree">
+            </div>
+
+            <div class="form__input-field">
+                <label for="vuzOnce">Признак единственного согласия в ВУЗе</label>
+                <input name="vuzOnce" type="checkbox" id="vuzOnce" name="vuzOnce">
+            </div>
+
+            <p><select class="form__input-field">
+                <option selected disabled>Выберите имеющиеся льготы</option>
+                <option value="iu7">Победа или призерство в олимпиаде</option>
+                <option value="iu6">Инвалидность</option>
+                <option value="iu8">Победа в Олимпийских играх</option>
+                <option value="iu8">Другое</option>
+            </select></p>
+
+            <div class="avatar-box__buttons">
+                <label for="hostel">Файл подтверждения льготы:</label>
+                <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg">
+            </div>
+        
+            <label for="login-submit">Отправить запрос на добавление заявки в очередь:</label>
+            <p class="form__validation-hint form__send-form-hint" id="validation-hint-login"><em></em></p>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="1-submit" class="form__submit-button">Отправить заявку в очередь на добавление</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="2-submit" class="form__submit-button">Проверить выполнилась ли заявка на добавление</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="3-submit" class="form__submit-button">Получить ответ</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="4-submit" class="form__submit-button">Подтвердить получение ответа</button>
+
+            <label for="login-submit">Отправить запрос на получение заявки в очередь:</label>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="5-submit" class="form__submit-button">Отправить заявку в очередь на получение</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="6-submit" class="form__submit-button">Проверить выполнилась ли заявка на получение</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="7-submit" class="form__submit-button">Получить ответ</button>
+            <button type="button" style="margin-top: 4px;margin-bottom: 4px;" id="8-submit" class="form__submit-button">Подтвердить получение ответа</button>
+        </form>
+    </div>
+
+    <div class="create-playlist-container">
+        <textarea id="one" rows="20" cols="203"></textarea>
+    </div>
+</div>

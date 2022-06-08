@@ -1,0 +1,54 @@
+<div id="navbar"></div>
+
+
+<div class="main">
+    <div class="main__settings-box">
+        <div class="settings-box__avatar-box">
+            <div class="avatar-box__avatar-container">
+                <img id="avatar-img" class="avatar-container__img avatar-container__avatar" src="{{avatar}}" alt="">
+            </div>
+            <div class="avatar-box__buttons">
+                <input type="file" id="avatar" name="avatar" class="buttons__upload-file" accept="image/png, image/jpeg">
+                <button id="avatar-upload-button" type="button" class="form__submit-button">Обновить</button>
+            </div>
+            <p id="settings-avatar-errors" class="form__validation-hint settings-box__settings-errors"></p>
+        </div>
+
+        <div class="settings-box__settings-inner">
+            <p class="settings-inner__header">Настройки</p>
+            <div class="settings-inner__settings-table">
+                <div class="settings-table__settings-row">
+                    <p class="settings-row__left">Имя пользователя:</p>
+                    <input type="text" id="user-username" class="form__input-field settings-row__right"
+                           placeholder="Имя пользователя" value="{{username}}" readonly>
+                </div>
+                <div>
+                    <div class="settings-table__settings-row">
+                        <p class="settings-row__left">Email:</p>
+                        <input type="text" id="user-email" class="form__input-field settings-row__right"
+                               placeholder="email" value="{{email}}">
+                    </div>
+                    <p id="settings-errors-email" class="settings-box__settings-errors form__validation-hint"></p>
+                </div>
+                <div>
+                    <div class="settings-table__settings-row">
+                        <p class="settings-row__left">Новый пароль:</p>
+                        <input class="form__input-field settings-row__right" type="password" id="user-password"
+                               placeholder="Пароль">
+                    </div>
+                    <div class="settings-table__settings-row">
+                        <p class="settings-row__left">Повторите пароль:</p>
+                        <input class="form__input-field settings-row__right" type="password" id="user-password-repeat"
+                               placeholder="Повторите пароль">
+                    </div>
+                    <p id="settings-errors-password" class="settings-box__settings-errors form__validation-hint"></p>
+                </div>
+            </div>
+
+            <button type="button" class="form__submit-button settings-inner__save-button"
+                    id="settings-save-button">Сохранить</button>
+            <p id="settings-server-response" class="settings-box__settings-errors form__validation-hint"></p>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,28 @@
+<div id="navbar"></div>
+
+
+<div class="main">
+    <div class="form-box">
+        <div class="form-box__button-box">
+            <div id="button-box__current-button" class="button-box__button-wrap switcher-on-signup"></div>
+            <a href="/login">
+                <button type="button" class="button-box__toggle-button" id="login-button">Войти</button>
+            </a>
+            <button type="button" class="button-box__toggle-button button-box__button_text_white" id="signup-button">
+                Регистрация
+            </button>
+        </div>
+
+        <form id="signup" class="form-box__form form-box__input-group" novalidate>
+            <input name="username" type="text" class="form__input-field" id="username-input"
+                   placeholder="Имя пользователя">
+            <p class="form__validation-hint" id="validation-hint-login"><em></em></p>
+            <input name="email" type="email" class="form__input-field" id="email-input" placeholder="Email">
+            <p class="form__validation-hint" id="validation-hint-email"><em></em></p>
+            <input name="password" type="password" class="form__input-field" id="password-input" placeholder="Пароль">
+            <p class="form__validation-hint" id="validation-hint-password"><em></em></p>
+            <p class="form__validation-hint form__send-form-hint" id="validation-hint-signup"><em></em></p>
+            <button type="submit" id="signup-submit" class="form__submit-button">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>

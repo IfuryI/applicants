@@ -1,0 +1,44 @@
+<div id="navbar"></div>
+
+<div class="main">
+    <div class="main__profile-card">
+        <div class="profile-card__container">
+            <div class="container__avatar-container">
+                <img class="avatar-container__avatar" src="{{avatar}}" alt="">
+            </div>
+
+            <div class="profile-card__content">
+                <div class="content__head">
+                    <div class="head__first-row">
+                        <p id="user-full-name" class="head__user-name">{{username}}</p>
+                    </div>
+                    <span id="user-email" class="head__user-email">{{email}}</span>
+                    {{#if (eq username (getUsername))}}
+                        <button id="button-profile-settings" class="head__settings-button">
+                            <a class="settings-button__settings-link" href="/settings">Настройки</a>
+                        </button>
+                    {{/if}}
+                </div>
+
+                {{!-- <div class="content__stats-grid">
+                    <div class="stats__stats-item">
+                        <p class="stats-item__name">Посмотрел фильмов</p>
+                        <span id="movies-watched" class="stats-item__value">{{movies_watched}}</span>
+                    </div>
+                    <div class="stats__stats-item">
+                        <p class="stats-item__name">Рецензий</p>
+                        <span id="reviews-number" class="stats-item__value">{{reviews_number}}</span>
+                    </div>
+                    <div class="stats__stats-item">
+                        <p class="stats-item__name">Подписчиков</p>
+                        <span id="followers-number" class="stats-item__value">{{subscribers}}</span>
+                    </div>
+                    <div class="stats__stats-item">
+                        <p class="stats-item__name">Подписок</p>
+                        <span id="following-number" class="stats-item__value">{{subscriptions}}</span>
+                    </div>
+                </div> --}}
+            </div>
+        </div>
+    </div>
+</div>

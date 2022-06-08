@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "indentation": 2,
+    "string-quotes": "double",
+    "declaration-colon-space-before": "never",
+    "declaration-colon-space-after": "always",
+    "rule-empty-line-before": "always"
+  }
+}
